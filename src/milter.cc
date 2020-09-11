@@ -5,14 +5,14 @@
 #include <string.h>
 #include <node/uv.h>
 #include <node.h>
-#include <v8.h>
+#include <nan.h>
 #include <arpa/inet.h>
 #include "libmilter/mfapi.h"
 #include "forward.h"
 #include "events.h"
 #include "envelope.h"
 
-using namespace v8;
+//using namespace v8;
 using namespace node;
 
 
@@ -516,7 +516,7 @@ void milter_start (const FunctionCallbackInfo<Value> &args)
     return;
   }
 
-  desc.xxfi_flags = args[1]->IntegerValue();
+  desc.xxfi_flags = args[1]->IntegerValue(Nan::GetCurrentContext()).FromJust();
 
   // ya dats lazy
   for (int i = 2; i < 15; i++)
@@ -526,9 +526,9 @@ void milter_start (const FunctionCallbackInfo<Value> &args)
       return;
     }
 
-  Local<String> connstr = args[0]->ToString();
-  char *c_connstr = new char[connstr->Utf8Length()+1];
-  connstr->WriteUtf8(c_connstr);
+  Local<String> connstr = args[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+  char *c_connstr = new char[connstr->Utf8Length(isolate)+1];
+  connstr->WriteUtf8(isolate, c_connstr);
 
   app.fcall.negotiate.Reset (isolate, Local<Function>::Cast(args[2]));
   app.fcall.connect.Reset   (isolate, Local<Function>::Cast(args[3]));
@@ -595,7 +595,7 @@ void milter_setbacklog (const FunctionCallbackInfo<Value> &args)
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number")));
     return;
   }
-  int n = args[0]->IntegerValue();
+  int n = args[0]->IntegerValue(Nan::GetCurrentContext()).FromJust();
   int r = smfi_setbacklog(n);
   args.GetReturnValue().Set(Number::New(isolate, r));
 }
@@ -617,7 +617,7 @@ void milter_setdbg (const FunctionCallbackInfo<Value> &args)
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number")));
     return;
   }
-  int f = args[0]->IntegerValue();
+  int f = args[0]->IntegerValue(Nan::GetCurrentContext()).FromJust();
   int r = smfi_setdbg(f);
   args.GetReturnValue().Set(Number::New(isolate, r));
 }
@@ -639,7 +639,7 @@ void milter_settimeout (const FunctionCallbackInfo<Value> &args)
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number")));
     return;
   }
-  int timeo = args[0]->IntegerValue();
+  int timeo = args[0]->IntegerValue(Nan::GetCurrentContext()).FromJust();
   int r = smfi_settimeout(timeo);
   args.GetReturnValue().Set(Number::New(isolate, r));
 }
@@ -677,7 +677,7 @@ void milter_version (const FunctionCallbackInfo<Value> &args)
 /**
  * module initialization
  */
-void init (Handle<Object> target, Handle<Value> module, Handle<Context> context)
+void init (Local<Object> target, Local<Value> module, Local<Context> context)
 {
   Isolate *isolate = Isolate::GetCurrent();
 

@@ -1,17 +1,21 @@
 {
     "name": "milter",
     "description": "bindings for writing postfix milter daemons",
-    "version": "2.0.0",
-    "author" : "jon shusta",
+    "version": "3.0.0",
+    "author" : "jon shusta, mahefa randimbisoa",
     "maintainers":[
         {
             "name":"jons",
             "email":"jon@wroth.org"
-        }
+        },
+	{
+		"name": "mahefa randimbisoa",
+		"email": "dotmg@users.sourceforge.net"
+	}
     ],
     "repository" : {
         "type" : "git",
-        "url" : "http://github.com/jons/node-milter.git"
+        "url" : "http://github.com/DotMG/node-milter.git"
     },
     "scripts":{
         "test": "nodeunit test"
@@ -21,6 +25,6 @@
     "devDependencies": {
         "nodeunit": "*"
     },
-    "engines": ["node =7.7.4"],
+    "engines": ["node =8.10.0"],
     "keywords": ["postfix", "milter"]
 }

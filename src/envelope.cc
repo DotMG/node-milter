@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <node.h>
-#include <v8.h>
+#include <nan.h>
 #include "envelope.h"
 
 using namespace v8;
@@ -55,7 +55,8 @@ void Envelope::Init (Local<Object> exports)
   NODE_SET_PROTOTYPE_METHOD(tmpl, "delrcpt",     SMFI_DelRecipient);
   NODE_SET_PROTOTYPE_METHOD(tmpl, "chgfrom",     SMFI_ChangeFrom);
 
-  constructor.Reset(isolate, tmpl->GetFunction());
+		Local<Context> context = isolate->GetCurrentContext();
+  constructor.Reset(isolate, tmpl->GetFunction(context).ToLocalChecked());
   // XXX: uncomment to let the programmer use 'new Envelope()'?
   //exports->Set(String::NewFromUtf8(Isolate, "Envelope"), tmpl->GetFunction());
 }
@@ -161,7 +162,7 @@ void Envelope::Done (const FunctionCallbackInfo<Value> &args)
     return;
   }
 
-  event->Done(isolate, args[0]->IntegerValue());
+  event->Done(isolate, args[0]->IntegerValue(Nan::GetCurrentContext()).FromJust());
 #ifdef DEBUG_COMMANDS
   fprintf(stderr, "Envelope::Done completed\n");
 #endif
@@ -202,10 +203,10 @@ void Envelope::Negotiate (const FunctionCallbackInfo<Value> &args)
       return;
     }
 
-  unsigned long f0 = args[0]->Uint32Value();
-  unsigned long f1 = args[1]->Uint32Value();
-  unsigned long f2 = args[2]->Uint32Value();
-  unsigned long f3 = args[3]->Uint32Value();
+  unsigned long f0 = args[0]->Uint32Value(Nan::GetCurrentContext()).FromJust();
+  unsigned long f1 = args[1]->Uint32Value(Nan::GetCurrentContext()).FromJust();
+  unsigned long f2 = args[2]->Uint32Value(Nan::GetCurrentContext()).FromJust();
+  unsigned long f3 = args[3]->Uint32Value(Nan::GetCurrentContext()).FromJust();
 
   MilterNegotiate *ev = (MilterNegotiate *)event;
   ev->Negotiate(f0, f1, f2, f3);
@@ -225,9 +226,9 @@ void Envelope::SMFI_GetSymbol (const FunctionCallbackInfo<Value> &args)
     return;
   }
 
-  Local<String> symname = args[0]->ToString();
-  char *c_symname  = new char[symname->Utf8Length()+1];
-  symname->WriteUtf8(c_symname);
+  Local<String> symname = args[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+  char *c_symname  = new char[symname->Utf8Length(isolate)+1];
+  symname->WriteUtf8(isolate, c_symname);
 
   char *c_symval = smfi_getsymval(envelope->smfi_context, c_symname);
   delete [] c_symname;
@@ -305,25 +306,25 @@ void Envelope::SMFI_SetReply (const FunctionCallbackInfo<Value> &args)
     }
   }
 
-  Local<String> rcode = args[0]->ToString();
-  char *c_rcode = new char[rcode->Utf8Length()+1];
-  rcode->WriteUtf8(c_rcode);
+  Local<String> rcode = args[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+  char *c_rcode = new char[rcode->Utf8Length(isolate)+1];
+  rcode->WriteUtf8(isolate, c_rcode);
 
   char *c_xcode = NULL;
   char *c_message = NULL;
 
   if (args.Length() > 1 && args[1]->IsString())
   {
-    Local<String> xcode   = args[1]->ToString();
-    c_xcode = new char[xcode->Utf8Length()+1];
-    xcode->WriteUtf8(c_xcode);
+    Local<String> xcode   = args[1]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+    c_xcode = new char[xcode->Utf8Length(isolate)+1];
+    xcode->WriteUtf8(isolate, c_xcode);
   }
 
   if (args.Length() > 2 && args[2]->IsString())
   {
-    Local<String> message = args[2]->ToString();
-    c_message = new char[message->Utf8Length()+1];
-    message->WriteUtf8(c_message);
+    Local<String> message = args[2]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+    c_message = new char[message->Utf8Length(isolate)+1];
+    message->WriteUtf8(isolate, c_message);
   }
 
   int r = smfi_setreply(envelope->smfi_context, c_rcode, c_xcode, c_message);
@@ -420,13 +421,13 @@ void Envelope::SMFI_AddHeader (const FunctionCallbackInfo<Value> &args)
     return;
   }
 
-  Local<String> headerf = args[0]->ToString();
-  Local<String> headerv = args[1]->ToString();
-  char *c_name  = new char[headerf->Utf8Length()+1];
-  char *c_value = new char[headerv->Utf8Length()+1];
+  Local<String> headerf = args[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+  Local<String> headerv = args[1]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+  char *c_name  = new char[headerf->Utf8Length(isolate)+1];
+  char *c_value = new char[headerv->Utf8Length(isolate)+1];
 
-  headerf->WriteUtf8(c_name);
-  headerv->WriteUtf8(c_value);
+  headerf->WriteUtf8(isolate, c_name);
+  headerv->WriteUtf8(isolate, c_value);
 
   int r = smfi_addheader(envelope->smfi_context, c_name, c_value);
 
@@ -522,8 +523,8 @@ void Envelope::SMFI_Quarantine (const FunctionCallbackInfo<Value> &args)
     return;
   }
 
-  Local<String> reason = args[0]->ToString();
-  size_t len = reason->Utf8Length();
+  Local<String> reason = args[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+  size_t len = reason->Utf8Length(isolate);
   if (len < 1)
   {
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected non-empty string")));
@@ -531,7 +532,7 @@ void Envelope::SMFI_Quarantine (const FunctionCallbackInfo<Value> &args)
   }
 
   char *c_reason = new char[len+1];
-  reason->WriteUtf8(c_reason);
+  reason->WriteUtf8(isolate, c_reason);
   int r = smfi_quarantine(envelope->smfi_context, c_reason);
   delete [] c_reason;
 
@@ -581,15 +582,15 @@ void Envelope::SMFI_ChangeFrom (const FunctionCallbackInfo<Value> &args)
   }
 
 
-  Local<String> address = args[0]->ToString();
-  char *c_address = new char[address->Utf8Length()+1];
+  Local<String> address = args[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+  char *c_address = new char[address->Utf8Length(isolate)+1];
   char *c_esmtp_args = NULL;
-  address->WriteUtf8(c_address);
+  address->WriteUtf8(isolate, c_address);
   if (args.Length() > 1)
   {
-    Local<String> esmtp_args = args[1]->ToString();
-    c_esmtp_args = new char[esmtp_args->Utf8Length()+1];
-    esmtp_args->WriteUtf8(c_esmtp_args);
+    Local<String> esmtp_args = args[1]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>());
+    c_esmtp_args = new char[esmtp_args->Utf8Length(isolate)+1];
+    esmtp_args->WriteUtf8(isolate, c_esmtp_args);
   }
 
   int r = smfi_chgfrom(envelope->smfi_context, c_address, c_esmtp_args);

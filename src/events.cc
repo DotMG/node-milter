@@ -160,7 +160,7 @@ void MilterEvent::DoFCall (Isolate *isolate, Persistent<Function> &pfunc, unsign
 {
   TryCatch tc(isolate);
   Local<Function> fcall = Local<Function>::New(isolate, pfunc);
-  fcall->Call(isolate->GetCurrentContext()->Global(), argc, argv);
+  fcall->Call(isolate->GetCurrentContext(), isolate->GetCurrentContext()->Global(), argc, argv);
   if (tc.HasCaught())
     FatalException(isolate, tc);
 }
