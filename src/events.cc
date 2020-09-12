@@ -89,11 +89,11 @@ bool MilterEvent::Done (Isolate *isolate, int retval)
 
   // throw exception if the sleeping libmilter thread is not signaled
   if (!this->is_done)
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Condition signal failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Condition signal failed").ToLocalChecked()));
 
   // throw exception if event is not yielded back to pthread
   if (!this->Unlock())
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Event unlock failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Event unlock failed").ToLocalChecked()));
 
   return this->is_done;
 }
@@ -234,8 +234,8 @@ void MilterConnect::FireWrapper (Isolate *isolate, bindings_t *local)
   const unsigned argc = 3;
   Local<Value> argv[argc] = {
     this->envelope,
-    String::NewFromUtf8(isolate, this->sz_host),
-    String::NewFromUtf8(isolate, this->sz_addr)
+    String::NewFromUtf8(isolate, this->sz_host).ToLocalChecked(),
+    String::NewFromUtf8(isolate, this->sz_addr).ToLocalChecked()
   };
   this->DoFCall(isolate, local->fcall.connect, argc, argv);
 }
@@ -257,7 +257,7 @@ void MilterUnknown::FireWrapper (Isolate *isolate, bindings_t *local)
   const unsigned argc = 2;
   Local<Value> argv[argc] = {
     this->envelope,
-    String::NewFromUtf8(isolate, this->sz_command)
+    String::NewFromUtf8(isolate, this->sz_command).ToLocalChecked()
   };
   this->DoFCall(isolate, local->fcall.unknown, argc, argv);
 }
@@ -274,7 +274,7 @@ void MilterHELO::FireWrapper (Isolate *isolate, bindings_t *local)
   const unsigned argc = 2;
   Local<Value> argv[argc] = {
     this->envelope,
-    String::NewFromUtf8(isolate, sz_helo)
+    String::NewFromUtf8(isolate, sz_helo).ToLocalChecked()
   };
   this->DoFCall(isolate, local->fcall.helo, argc, argv);
 }
@@ -290,7 +290,7 @@ void MilterMAILFROM::FireWrapper (Isolate *isolate, bindings_t *local)
   const unsigned argc = 2;
   Local<Value> argv[argc] = {
     this->envelope,
-    String::NewFromUtf8(isolate, szpp_argv[0])
+    String::NewFromUtf8(isolate, szpp_argv[0]).ToLocalChecked()
   };
   this->DoFCall(isolate, local->fcall.envfrom, argc, argv);
 }
@@ -306,7 +306,7 @@ void MilterRCPTTO::FireWrapper (Isolate *isolate, bindings_t *local)
   const unsigned argc = 2;
   Local<Value> argv[argc] = {
     this->envelope,
-    String::NewFromUtf8(isolate, szpp_argv[0])
+    String::NewFromUtf8(isolate, szpp_argv[0]).ToLocalChecked()
   };
   this->DoFCall(isolate, local->fcall.envrcpt, argc, argv);
 }
@@ -336,8 +336,8 @@ void MilterHeader::FireWrapper (Isolate *isolate, bindings_t *local)
   const unsigned argc = 3;
   Local<Value> argv[argc] = {
     this->envelope,
-    String::NewFromUtf8(isolate, sz_name),
-    String::NewFromUtf8(isolate, sz_value)
+    String::NewFromUtf8(isolate, sz_name).ToLocalChecked(),
+    String::NewFromUtf8(isolate, sz_value).ToLocalChecked()
   };
   this->DoFCall(isolate, local->fcall.header, argc, argv);
 }

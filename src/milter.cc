@@ -502,17 +502,17 @@ void milter_start (const FunctionCallbackInfo<Value> &args)
 
   if (args.Length() < 14)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
   if (!args[0]->IsString())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected string")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected string").ToLocalChecked()));
     return;
   }
   if (!args[1]->IsNumber())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number").ToLocalChecked()));
     return;
   }
 
@@ -522,7 +522,7 @@ void milter_start (const FunctionCallbackInfo<Value> &args)
   for (int i = 2; i < 15; i++)
     if (!args[i]->IsFunction())
     {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected function")));
+      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected function").ToLocalChecked()));
       return;
     }
 
@@ -587,12 +587,12 @@ void milter_setbacklog (const FunctionCallbackInfo<Value> &args)
   HandleScope scope(isolate);
   if (args.Length() < 1)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
   if (!args[0]->IsNumber())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number").ToLocalChecked()));
     return;
   }
   int n = args[0]->IntegerValue(Nan::GetCurrentContext()).FromJust();
@@ -609,12 +609,12 @@ void milter_setdbg (const FunctionCallbackInfo<Value> &args)
   HandleScope scope(isolate);
   if (args.Length() < 1)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
   if (!args[0]->IsNumber())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number").ToLocalChecked()));
     return;
   }
   int f = args[0]->IntegerValue(Nan::GetCurrentContext()).FromJust();
@@ -631,12 +631,12 @@ void milter_settimeout (const FunctionCallbackInfo<Value> &args)
   HandleScope scope(isolate);
   if (args.Length() < 1)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
   if (!args[0]->IsNumber())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number").ToLocalChecked()));
     return;
   }
   int timeo = args[0]->IntegerValue(Nan::GetCurrentContext()).FromJust();
@@ -661,15 +661,16 @@ void milter_stop (const FunctionCallbackInfo<Value> &args)
 void milter_version (const FunctionCallbackInfo<Value> &args)
 {
   Isolate *isolate = Isolate::GetCurrent();
+  Local<Context> icontext = isolate->GetCurrentContext();
   HandleScope scope (isolate);
   unsigned int major, minor, patchlevel;
 
   smfi_version(&major, &minor, &patchlevel);
 
   Local<Array> r = Array::New(isolate);
-  r->Set(0, Number::New(isolate, major));
-  r->Set(1, Number::New(isolate, minor));
-  r->Set(2, Number::New(isolate, patchlevel));
+  r->Set(icontext, 0, Number::New(isolate, major));
+  r->Set(icontext, 1, Number::New(isolate, minor));
+  r->Set(icontext, 2, Number::New(isolate, patchlevel));
   args.GetReturnValue().Set(r);
 }
 
@@ -680,44 +681,45 @@ void milter_version (const FunctionCallbackInfo<Value> &args)
 void init (Local<Object> target, Local<Value> module, Local<Context> context)
 {
   Isolate *isolate = Isolate::GetCurrent();
+  Local<Context> icontext = isolate->GetCurrentContext();
 
   // return values from envelope functions
-  target->Set(String::NewFromUtf8(isolate, "MI_SUCCESS", String::kInternalizedString), Number::New(isolate, MI_SUCCESS));
-  target->Set(String::NewFromUtf8(isolate, "MI_FAILURE", String::kInternalizedString), Number::New(isolate, MI_FAILURE));
+  target->Set(icontext, String::NewFromUtf8(isolate, "MI_SUCCESS").ToLocalChecked(), Number::New(isolate, MI_SUCCESS));
+  target->Set(icontext, String::NewFromUtf8(isolate, "MI_FAILURE").ToLocalChecked(), Number::New(isolate, MI_FAILURE));
 
   // macro contexts/locations
-  target->Set(String::NewFromUtf8(isolate, "SMFIM_CONNECT", String::kInternalizedString), Number::New(isolate, SMFIM_CONNECT));
-  target->Set(String::NewFromUtf8(isolate, "SMFIM_HELO",    String::kInternalizedString), Number::New(isolate, SMFIM_HELO));
-  target->Set(String::NewFromUtf8(isolate, "SMFIM_ENVFROM", String::kInternalizedString), Number::New(isolate, SMFIM_ENVFROM));
-  target->Set(String::NewFromUtf8(isolate, "SMFIM_ENVRCPT", String::kInternalizedString), Number::New(isolate, SMFIM_ENVRCPT));
-  target->Set(String::NewFromUtf8(isolate, "SMFIM_DATA",    String::kInternalizedString), Number::New(isolate, SMFIM_DATA));
-  target->Set(String::NewFromUtf8(isolate, "SMFIM_EOM",     String::kInternalizedString), Number::New(isolate, SMFIM_EOM));
-  target->Set(String::NewFromUtf8(isolate, "SMFIM_EOH",     String::kInternalizedString), Number::New(isolate, SMFIM_EOH));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIM_CONNECT").ToLocalChecked(), Number::New(isolate, SMFIM_CONNECT));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIM_HELO").ToLocalChecked(), Number::New(isolate, SMFIM_HELO));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIM_ENVFROM").ToLocalChecked(), Number::New(isolate, SMFIM_ENVFROM));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIM_ENVRCPT").ToLocalChecked(), Number::New(isolate, SMFIM_ENVRCPT));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIM_DATA").ToLocalChecked(), Number::New(isolate, SMFIM_DATA));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIM_EOM").ToLocalChecked(), Number::New(isolate, SMFIM_EOM));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIM_EOH").ToLocalChecked(), Number::New(isolate, SMFIM_EOH));
 
   // negotiate flags
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_NONE",        String::kInternalizedString), Number::New(isolate, SMFIF_NONE));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_ADDHDRS",     String::kInternalizedString), Number::New(isolate, SMFIF_ADDHDRS));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_CHGBODY",     String::kInternalizedString), Number::New(isolate, SMFIF_CHGBODY));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_MODBODY",     String::kInternalizedString), Number::New(isolate, SMFIF_MODBODY));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_ADDRCPT",     String::kInternalizedString), Number::New(isolate, SMFIF_ADDRCPT));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_DELRCPT",     String::kInternalizedString), Number::New(isolate, SMFIF_DELRCPT));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_CHGHDRS",     String::kInternalizedString), Number::New(isolate, SMFIF_CHGHDRS));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_QUARANTINE",  String::kInternalizedString), Number::New(isolate, SMFIF_QUARANTINE));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_CHGFROM",     String::kInternalizedString), Number::New(isolate, SMFIF_CHGFROM));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_ADDRCPT_PAR", String::kInternalizedString), Number::New(isolate, SMFIF_ADDRCPT_PAR));
-  target->Set(String::NewFromUtf8(isolate, "SMFIF_SETSYMLIST",  String::kInternalizedString), Number::New(isolate, SMFIF_SETSYMLIST));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_NONE").ToLocalChecked(), Number::New(isolate, SMFIF_NONE));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_ADDHDRS").ToLocalChecked(), Number::New(isolate, SMFIF_ADDHDRS));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_CHGBODY").ToLocalChecked(), Number::New(isolate, SMFIF_CHGBODY));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_MODBODY").ToLocalChecked(), Number::New(isolate, SMFIF_MODBODY));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_ADDRCPT").ToLocalChecked(), Number::New(isolate, SMFIF_ADDRCPT));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_DELRCPT").ToLocalChecked(), Number::New(isolate, SMFIF_DELRCPT));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_CHGHDRS").ToLocalChecked(), Number::New(isolate, SMFIF_CHGHDRS));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_QUARANTINE").ToLocalChecked(), Number::New(isolate, SMFIF_QUARANTINE));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_CHGFROM").ToLocalChecked(), Number::New(isolate, SMFIF_CHGFROM));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_ADDRCPT_PAR").ToLocalChecked(), Number::New(isolate, SMFIF_ADDRCPT_PAR));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIF_SETSYMLIST").ToLocalChecked(), Number::New(isolate, SMFIF_SETSYMLIST));
 
   // normal callback return values
-  target->Set(String::NewFromUtf8(isolate, "SMFIS_CONTINUE", String::kInternalizedString), Number::New(isolate, SMFIS_CONTINUE));
-  target->Set(String::NewFromUtf8(isolate, "SMFIS_REJECT",   String::kInternalizedString), Number::New(isolate, SMFIS_REJECT));
-  target->Set(String::NewFromUtf8(isolate, "SMFIS_DISCARD",  String::kInternalizedString), Number::New(isolate, SMFIS_DISCARD));
-  target->Set(String::NewFromUtf8(isolate, "SMFIS_ACCEPT",   String::kInternalizedString), Number::New(isolate, SMFIS_ACCEPT));
-  target->Set(String::NewFromUtf8(isolate, "SMFIS_TEMPFAIL", String::kInternalizedString), Number::New(isolate, SMFIS_TEMPFAIL));
-  target->Set(String::NewFromUtf8(isolate, "SMFIS_NOREPLY",  String::kInternalizedString), Number::New(isolate, SMFIS_NOREPLY));
-  target->Set(String::NewFromUtf8(isolate, "SMFIS_SKIP",     String::kInternalizedString), Number::New(isolate, SMFIS_SKIP));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIS_CONTINUE").ToLocalChecked(), Number::New(isolate, SMFIS_CONTINUE));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIS_REJECT").ToLocalChecked(), Number::New(isolate, SMFIS_REJECT));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIS_DISCARD").ToLocalChecked(), Number::New(isolate, SMFIS_DISCARD));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIS_ACCEPT").ToLocalChecked(), Number::New(isolate, SMFIS_ACCEPT));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIS_TEMPFAIL").ToLocalChecked(), Number::New(isolate, SMFIS_TEMPFAIL));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIS_NOREPLY").ToLocalChecked(), Number::New(isolate, SMFIS_NOREPLY));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIS_SKIP").ToLocalChecked(), Number::New(isolate, SMFIS_SKIP));
 
   // callback return val for negotiate only
-  target->Set(String::NewFromUtf8(isolate, "SMFIS_ALL_OPTS", String::kInternalizedString), Number::New(isolate, SMFIS_ALL_OPTS));
+  target->Set(icontext, String::NewFromUtf8(isolate, "SMFIS_ALL_OPTS").ToLocalChecked(), Number::New(isolate, SMFIS_ALL_OPTS));
 
   Envelope::Init(target);
 

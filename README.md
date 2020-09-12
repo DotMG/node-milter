@@ -1,8 +1,10 @@
 # node-milter
 node.js bindings for postfix milters
 
-this addon produces libmilter callbacks in node.js v7.7.4 so that you don't have
+this addon produces libmilter callbacks in node.js so that you don't have
 to be a C programmer to use postfix with libmilter.
+
+Branche 4.x is for node  v14.x 
 
 when its main function is called, libmilter creates a threaded daemon where each
 mail session has one unique thread in your program servicing it. this main is

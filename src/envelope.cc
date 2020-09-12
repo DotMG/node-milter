@@ -31,7 +31,7 @@ void Envelope::Init (Local<Object> exports)
 {
   Isolate *isolate = exports->GetIsolate();
   Local<FunctionTemplate> tmpl = FunctionTemplate::New(isolate, New);
-  tmpl->SetClassName(String::NewFromUtf8(isolate, "Envelope"));
+  tmpl->SetClassName(String::NewFromUtf8(isolate, "Envelope").ToLocalChecked());
   tmpl->InstanceTemplate()->SetInternalFieldCount(2);
 
   NODE_SET_PROTOTYPE_METHOD(tmpl, "done",      Done);
@@ -83,7 +83,7 @@ Local<Object> Envelope::PrivateInstance (Isolate *isolate)
   Local<Function> cons = Local<Function>::New(isolate, constructor);
   Local<Context> context = isolate->GetCurrentContext();
   Local<Object> envelope = cons->NewInstance(context, 0, argv).ToLocalChecked();
-  envelope->Set(String::NewFromUtf8(isolate, "local", String::kInternalizedString), Object::New(isolate));
+  envelope->Set(context, String::NewFromUtf8(isolate, "local").ToLocalChecked(), Object::New(isolate)); //???
   return envelope;
 }
 
@@ -140,25 +140,25 @@ void Envelope::Done (const FunctionCallbackInfo<Value> &args)
 #endif
   if (NULL == envelope)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Done unwrap failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Done unwrap failed").ToLocalChecked()));
     return;
   }
   MilterEvent *event = envelope->current_event;
   if (NULL == event)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope done method called outside event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope done method called outside event context").ToLocalChecked()));
     return;
   }
 
   if (args.Length() < 1)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
 
   if (!args[0]->IsNumber())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected number")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected number").ToLocalChecked()));
     return;
   }
 
@@ -178,28 +178,28 @@ void Envelope::Negotiate (const FunctionCallbackInfo<Value> &args)
 
   if (NULL == envelope)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Negotiate unwrap failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Negotiate unwrap failed").ToLocalChecked()));
     return;
   }
   MilterEvent *event = envelope->current_event;
 
   if (NULL == event || !event->IsNegotiate())
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope negotiate method called outside event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope negotiate method called outside event context").ToLocalChecked()));
     return;
   }
 
 
   if (args.Length() < 4)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
 
   for (int i = 0; i < 4; i++)
     if (!args[i]->IsNumber())
     {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number")));
+      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid argument: expected number").ToLocalChecked()));
       return;
     }
 
@@ -222,7 +222,7 @@ void Envelope::SMFI_GetSymbol (const FunctionCallbackInfo<Value> &args)
 
   if (NULL == envelope)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_GetSymbol unwrap failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_GetSymbol unwrap failed").ToLocalChecked()));
     return;
   }
 
@@ -233,7 +233,7 @@ void Envelope::SMFI_GetSymbol (const FunctionCallbackInfo<Value> &args)
   char *c_symval = smfi_getsymval(envelope->smfi_context, c_symname);
   delete [] c_symname;
 
-  args.GetReturnValue().Set(String::NewFromUtf8(isolate, c_symval ? c_symval : ""));
+  args.GetReturnValue().Set(String::NewFromUtf8(isolate, c_symval ? c_symval : "").ToLocalChecked());
 
   // TODO: either segfault or memory leak here, probably
   if (c_symval)
@@ -246,7 +246,7 @@ void Envelope::SMFI_GetSymbol (const FunctionCallbackInfo<Value> &args)
 void Envelope::SMFI_SetSymbolList (const FunctionCallbackInfo<Value> &args)
 {
   Isolate *isolate = args.GetIsolate();
-  isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Not yet implemented")));
+  isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Not yet implemented").ToLocalChecked()));
 
   // TODO: smfi_setsymlist
 }
@@ -261,31 +261,31 @@ void Envelope::SMFI_SetReply (const FunctionCallbackInfo<Value> &args)
 
   if (NULL == envelope)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_SetReply unwrap failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_SetReply unwrap failed").ToLocalChecked()));
     return;
   }
   MilterEvent *event = envelope->current_event;
   if (NULL == event)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called out of event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called out of event context").ToLocalChecked()));
     return;
   }
   if (event->IsNegotiate() /*|| event->IsConnect()*/)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context").ToLocalChecked()));
     return;
   }
 
 
   if (args.Length() < 1)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
 
   if (!args[0]->IsString() && !args[0]->IsNumber())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected number or string")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected number or string").ToLocalChecked()));
     return;
   }
 
@@ -293,14 +293,14 @@ void Envelope::SMFI_SetReply (const FunctionCallbackInfo<Value> &args)
   {
     if (!args[1]->IsString() && !args[1]->IsNull() && !args[1]->IsUndefined())
     {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Second argument: expected string, null, or undefined")));
+      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Second argument: expected string, null, or undefined").ToLocalChecked()));
       return;
     }
     if (args.Length() > 2)
     {
       if (!args[2]->IsString() && !args[2]->IsNull() && !args[1]->IsUndefined())
       {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Third argument: expected string, null, or undefined")));
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Third argument: expected string, null, or undefined").ToLocalChecked()));
         return;
       }
     }
@@ -344,7 +344,7 @@ void Envelope::SMFI_SetReply (const FunctionCallbackInfo<Value> &args)
 void Envelope::SMFI_SetMultilineReply (const FunctionCallbackInfo<Value> &args)
 {
   Isolate *isolate = args.GetIsolate();
-  isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Not yet implemented")));
+  isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Not yet implemented").ToLocalChecked()));
 
   // TODO: implement with variable arguments somehow. smfi_setmlreply(rcode,xcode,vaargs)
 }
@@ -359,19 +359,19 @@ void Envelope::SMFI_Progress (const FunctionCallbackInfo<Value> &args)
 
   if (NULL == envelope)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_Progress unwrap failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_Progress unwrap failed").ToLocalChecked()));
     return;
   }
   MilterEvent *event = envelope->current_event;
   if (NULL == event)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called outside event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called outside event context").ToLocalChecked()));
     return;
   }
 
   if (!event->IsEndMessage())
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context").ToLocalChecked()));
     return;
   }
   int r = smfi_progress(envelope->smfi_context);
@@ -388,36 +388,36 @@ void Envelope::SMFI_AddHeader (const FunctionCallbackInfo<Value> &args)
 
   if (NULL == envelope)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_AddHeader unwrap failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_AddHeader unwrap failed").ToLocalChecked()));
     return;
   }
   MilterEvent *event = envelope->current_event;
   if (NULL == event)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called outside event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called outside event context").ToLocalChecked()));
     return;
   }
   if (!event->IsEndMessage())
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context").ToLocalChecked()));
     return;
   }
 
   if (args.Length() < 2)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
 
   if (!args[0]->IsString())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected string")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected string").ToLocalChecked()));
     return;
   }
 
   if (!args[1]->IsString())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Second argument: expected string")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Second argument: expected string").ToLocalChecked()));
     return;
   }
 
@@ -496,30 +496,30 @@ void Envelope::SMFI_Quarantine (const FunctionCallbackInfo<Value> &args)
 
   if (NULL == envelope)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_Quarantine unwrap failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_Quarantine unwrap failed").ToLocalChecked()));
     return;
   }
   MilterEvent *event = envelope->current_event;
   if (NULL == event)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called outside event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called outside event context").ToLocalChecked()));
     return;
   }
   if (!event->IsEndMessage())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context").ToLocalChecked()));
     return;
   }
 
 
   if (args.Length() < 1)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
   if (!args[0]->IsString())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected string")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected string").ToLocalChecked()));
     return;
   }
 
@@ -527,7 +527,7 @@ void Envelope::SMFI_Quarantine (const FunctionCallbackInfo<Value> &args)
   size_t len = reason->Utf8Length(isolate);
   if (len < 1)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected non-empty string")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected non-empty string").ToLocalChecked()));
     return;
   }
 
@@ -549,35 +549,35 @@ void Envelope::SMFI_ChangeFrom (const FunctionCallbackInfo<Value> &args)
 
   if (NULL == envelope)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_ChangeFrom unwrap failed")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "SMFI_ChangeFrom unwrap failed").ToLocalChecked()));
     return;
   }
   MilterEvent *event = envelope->current_event;
   if (NULL == event)
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called outside event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called outside event context").ToLocalChecked()));
     return;
   }
   if (!event->IsEndMessage())
   {
-    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context")));
+    isolate->ThrowException(Exception::Error(String::NewFromUtf8(isolate, "Envelope method called from prohibited event context").ToLocalChecked()));
     return;
   }
 
   if (args.Length() < 1)
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
     return;
   }
 
   if (!args[0]->IsString())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected string")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "First argument: expected string").ToLocalChecked()));
     return;
   }
   if (args.Length() > 1 && !args[1]->IsString())
   {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Second argument: expected string")));
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Second argument: expected string").ToLocalChecked()));
     return;
   }
 
