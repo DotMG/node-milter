@@ -216,6 +216,11 @@ sfsistat fi_connect (SMFICTX *context, char *host, _SOCK_ADDR *sa)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
   int retval;
+  // DotMG SegFault1
+  if (env == NULL) 
+  {
+	  return SMFIS_TEMPFAIL;
+  }
 
   MilterConnect *event = new MilterConnect(env, host, (sockaddr_in *)sa);
 #ifdef DEBUG_MILTEREVENT
