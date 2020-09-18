@@ -219,6 +219,7 @@ sfsistat fi_connect (SMFICTX *context, char *host, _SOCK_ADDR *sa)
   // DotMG SegFault1
   if (env == NULL) 
   {
+			fprintf(stderr, "ERRRRRR: milter.cc/222");
 	  return SMFIS_TEMPFAIL;
   }
 
@@ -237,6 +238,12 @@ sfsistat fi_connect (SMFICTX *context, char *host, _SOCK_ADDR *sa)
 sfsistat fi_unknown (SMFICTX *context, const char *command)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/244");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterUnknown *event = new MilterUnknown(env, command);
 #ifdef DEBUG_MILTEREVENT
@@ -253,6 +260,12 @@ sfsistat fi_unknown (SMFICTX *context, const char *command)
 sfsistat fi_helo (SMFICTX *context, char *helo)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/266");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterHELO *event = new MilterHELO(env, helo);
 #ifdef DEBUG_MILTEREVENT
@@ -270,6 +283,12 @@ sfsistat fi_helo (SMFICTX *context, char *helo)
 sfsistat fi_envfrom (SMFICTX *context, char **argv)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/289");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterMAILFROM *event = new MilterMAILFROM(env, argv);
 #ifdef DEBUG_MILTEREVENT
@@ -287,6 +306,12 @@ sfsistat fi_envfrom (SMFICTX *context, char **argv)
 sfsistat fi_envrcpt (SMFICTX *context, char **argv)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/312");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterRCPTTO *event = new MilterRCPTTO(env, argv);
 #ifdef DEBUG_MILTEREVENT
@@ -304,6 +329,12 @@ sfsistat fi_envrcpt (SMFICTX *context, char **argv)
 sfsistat fi_data (SMFICTX *context)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/335");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterDATA *event = new MilterDATA(env);
 #ifdef DEBUG_MILTEREVENT
@@ -321,6 +352,12 @@ sfsistat fi_data (SMFICTX *context)
 sfsistat fi_header (SMFICTX *context, char *name, char *value)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/358");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterHeader *event = new MilterHeader(env, name, value);
 #ifdef DEBUG_MILTEREVENT_HEADERS_TOO
@@ -338,6 +375,12 @@ sfsistat fi_header (SMFICTX *context, char *name, char *value)
 sfsistat fi_eoh (SMFICTX *context)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/381");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterEndHeaders *event = new MilterEndHeaders(env);
 #ifdef DEBUG_MILTEREVENT
@@ -356,6 +399,12 @@ sfsistat fi_eoh (SMFICTX *context)
 sfsistat fi_body (SMFICTX *context, unsigned char *segment, size_t len)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/405");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterMessageData *event = new MilterMessageData(env, segment, len);
 #ifdef DEBUG_MILTEREVENT
@@ -373,6 +422,12 @@ sfsistat fi_body (SMFICTX *context, unsigned char *segment, size_t len)
 sfsistat fi_eom (SMFICTX *context)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/428");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterEndMessage *event = new MilterEndMessage(env);
 #ifdef DEBUG_MILTEREVENT
@@ -393,6 +448,12 @@ sfsistat fi_eom (SMFICTX *context)
 sfsistat fi_abort (SMFICTX *context)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/454");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterAbort *event = new MilterAbort(env);
 #ifdef DEBUG_MILTEREVENT
@@ -409,6 +470,12 @@ sfsistat fi_abort (SMFICTX *context)
 sfsistat fi_close (SMFICTX *context)
 {
   envelope_t *env = (envelope_t *)smfi_getpriv(context);
+  // DotMG SegFault2
+  if (env == NULL) 
+  {
+			fprintf(stderr, "ERRRRRR: milter.cc/476");
+	  return SMFIS_TEMPFAIL;
+  }
   int retval;
   MilterClose *event = new MilterClose(env);
 #ifdef DEBUG_MILTEREVENT
